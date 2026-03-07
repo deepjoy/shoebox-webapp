@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "no-unused-vars": "warn",
+    "no-console": "warn",
+    "eqeqeq": ["error", "smart"],
+    "no-debugger": "error"
+  },
+  "ignorePatterns": ["dist", "node_modules"]
+}
