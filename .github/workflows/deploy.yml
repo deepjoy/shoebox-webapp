@@ -38,7 +38,7 @@ jobs:
       - name: Copy 404.html for SPA routing
         run: cp packages/app/dist/index.html packages/app/dist/404.html
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: packages/app/dist
 
