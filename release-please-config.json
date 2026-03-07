@@ -1,0 +1,12 @@
+{
+  "packages": {
+    "packages/api": {
+      "release-type": "node",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/app": {
+      "release-type": "node",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}

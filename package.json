@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "description": "Web-based browser for S3-compatible object storage",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deepjoy/shoebox-webapp.git"
+  },
+  "homepage": "https://github.com/deepjoy/shoebox-webapp",
+  "bugs": "https://github.com/deepjoy/shoebox-webapp/issues",
+  "scripts": {
+    "dev": "pnpm --filter @shoebox/app dev",
+    "build": "pnpm --filter @shoebox/api build && pnpm --filter @shoebox/app build",
+    "preview": "pnpm --filter @shoebox/app preview",
+    "lint": "oxlint",
+    "fmt": "oxfmt .",
+    "test": "pnpm --filter @shoebox/api test",
+    "fmt:check": "oxfmt --check .",
+    "prepare": "lefthook install"
+  },
+  "dependencies": {
+    "react-error-boundary": "^6.1.1"
+  },
+  "devDependencies": {
+    "lefthook": "^1.11.0",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.51.0"
+  }
+}
