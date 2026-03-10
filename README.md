@@ -43,7 +43,11 @@ Browsers block cross-origin requests by default. You must configure CORS on ever
 **Using curl (with SigV4 signing):**
 
 ```bash
-curl -X PUT 'http://localhost:9000/Photos?cors' \
+export AWS_ACCESS_KEY_ID='your-access-key'
+export AWS_SECRET_ACCESS_KEY='your-secret-key'
+export BUCKET='Photos'
+
+curl -X PUT "http://localhost:9000/${BUCKET}?cors" \
   --aws-sigv4 "aws:amz:us-east-1:s3" \
   --user "$AWS_ACCESS_KEY_ID:$AWS_SECRET_ACCESS_KEY" \
   -H "Content-Type: application/json" \
@@ -54,7 +58,7 @@ curl -X PUT 'http://localhost:9000/Photos?cors' \
 
 ```bash
 aws --endpoint-url http://localhost:9000 s3api put-bucket-cors \
-  --bucket Photos \
+  --bucket "$BUCKET" \
   --cors-configuration '{"CORSRules":[{"AllowedOrigins":["*"],"AllowedMethods":["GET","PUT","POST","DELETE","HEAD"],"AllowedHeaders":["*"],"ExposeHeaders":["ETag","x-amz-request-id"],"MaxAgeSeconds":3600}]}'
 ```
 

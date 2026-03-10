@@ -98,6 +98,7 @@ export interface FindDuplicatesOptions {
   allowPartial?: boolean;
   continuationToken?: string;
   keyContains?: string;
+  maxDepth?: number;
 }
 
 /** Single-bucket duplicate report. */

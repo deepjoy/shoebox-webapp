@@ -86,6 +86,7 @@ export async function findBucketDuplicates(
   if (options.allowPartial) params.set("allow-partial", "true");
   if (options.continuationToken) params.set("continuation-token", options.continuationToken);
   if (options.keyContains) params.set("key-contains", options.keyContains);
+  if (options.maxDepth != null) params.set("max-depth", String(options.maxDepth));
 
   const res = await signer.fetch(`${endpoint}/${bucket}?${params}`);
   if (!res.ok) throw new Error(`FindBucketDuplicates failed: ${res.status}`);
@@ -111,6 +112,7 @@ export async function findBucketDuplicateDirs(
     maxResults?: number;
     prefix?: string;
     continuationToken?: string;
+    maxDepth?: number;
   } = {},
 ): Promise<DuplicateDirReport> {
   const params = new URLSearchParams({ "duplicate-dirs": "" });
@@ -118,6 +120,7 @@ export async function findBucketDuplicateDirs(
   if (options.maxResults != null) params.set("max-results", String(options.maxResults));
   if (options.prefix) params.set("prefix", options.prefix);
   if (options.continuationToken) params.set("continuation-token", options.continuationToken);
+  if (options.maxDepth != null) params.set("max-depth", String(options.maxDepth));
 
   const res = await signer.fetch(`${endpoint}/${bucket}?${params}`);
   if (!res.ok) throw new Error(`FindBucketDuplicateDirs failed: ${res.status}`);

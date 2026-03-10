@@ -42,7 +42,7 @@ export function ObjectTable({ prefix, folders, objects, footer }: ObjectTablePro
   const connectionId = useConnectionId();
   const bucket = useBucket();
   // Duplicate directories from backend (folder IS a duplicate of another folder)
-  const { data: dirPages } = useAllDuplicateDirsForPrefix(connectionId, bucket, prefix);
+  const { data: dirPages } = useAllDuplicateDirsForPrefix(connectionId, bucket, prefix, 1);
   const duplicateFolders = new Set<string>();
   if (dirPages) {
     for (const page of dirPages.pages) {
@@ -74,7 +74,7 @@ export function ObjectTable({ prefix, folders, objects, footer }: ObjectTablePro
   }
 
   // File-level duplicates from backend (folder CONTAINS duplicate files)
-  const { data: dupPages } = useAllDuplicatesForPrefix(connectionId, bucket, prefix);
+  const { data: dupPages } = useAllDuplicatesForPrefix(connectionId, bucket, prefix, 1);
   const allGroups = dupPages?.pages.flatMap((p) => p.duplicates) ?? [];
   const sortedGroups = sortDuplicatesByRelevance(allGroups, prefix);
   const containsDuplicates = new Set<string>();

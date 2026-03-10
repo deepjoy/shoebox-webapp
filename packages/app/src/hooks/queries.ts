@@ -20,10 +20,10 @@ export const queryKeys = {
     ["objects", connectionId, bucket, prefix] as const,
   headObject: (connectionId: string, bucket: string, key: string) =>
     ["head-object", connectionId, bucket, key] as const,
-  duplicates: (connectionId: string, bucket: string, keyContains?: string) =>
-    ["duplicates", connectionId, bucket, keyContains] as const,
-  duplicateDirs: (connectionId: string, bucket: string, prefix?: string) =>
-    ["duplicate-dirs", connectionId, bucket, prefix] as const,
+  duplicates: (connectionId: string, bucket: string, keyContains?: string, maxDepth?: number) =>
+    ["duplicates", connectionId, bucket, keyContains, maxDepth] as const,
+  duplicateDirs: (connectionId: string, bucket: string, prefix?: string, maxDepth?: number) =>
+    ["duplicate-dirs", connectionId, bucket, prefix, maxDepth] as const,
   scanStatus: (connectionId: string) => ["scan-status", connectionId] as const,
 };
 
@@ -113,16 +113,22 @@ export function useInfiniteDuplicates(connectionId: string, bucket: string, keyC
  * scoped to a key prefix. Used by ObjectTable to detect which folders
  * contain duplicates without blocking render.
  */
-export function useAllDuplicatesForPrefix(connectionId: string, bucket: string, prefix: string) {
+export function useAllDuplicatesForPrefix(
+  connectionId: string,
+  bucket: string,
+  prefix: string,
+  maxDepth?: number,
+) {
   const client = useShoeboxClient();
   const query = useInfiniteQuery({
-    queryKey: queryKeys.duplicates(connectionId, bucket, prefix || undefined),
+    queryKey: queryKeys.duplicates(connectionId, bucket, prefix || undefined, maxDepth),
     queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
       client.findBucketDuplicates(bucket, {
         maxResults: DUPLICATES_PAGE_SIZE,
         allowPartial: true,
         continuationToken: pageParam,
         keyContains: prefix || undefined,
+        maxDepth,
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: DuplicateReport) =>
@@ -143,15 +149,21 @@ export function useAllDuplicatesForPrefix(connectionId: string, bucket: string, 
  * Non-suspense infinite query that auto-fetches all pages of duplicate
  * directories scoped to a prefix. Uses the backend duplicate-dirs endpoint.
  */
-export function useAllDuplicateDirsForPrefix(connectionId: string, bucket: string, prefix: string) {
+export function useAllDuplicateDirsForPrefix(
+  connectionId: string,
+  bucket: string,
+  prefix: string,
+  maxDepth?: number,
+) {
   const client = useShoeboxClient();
   const query = useInfiniteQuery({
-    queryKey: queryKeys.duplicateDirs(connectionId, bucket, prefix || undefined),
+    queryKey: queryKeys.duplicateDirs(connectionId, bucket, prefix || undefined, maxDepth),
     queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
       client.findBucketDuplicateDirs(bucket, {
         maxResults: DUPLICATES_PAGE_SIZE,
         prefix: prefix || undefined,
         continuationToken: pageParam,
+        maxDepth,
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: DuplicateDirReport) =>
