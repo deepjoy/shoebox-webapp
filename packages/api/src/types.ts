@@ -131,6 +131,20 @@ export interface DuplicateDirReport {
   duplicate_dirs: DuplicateDirGroup[];
 }
 
+/** Stats for a single directory (from ?dir-stats). */
+export interface DirStats {
+  prefix: string;
+  file_count: number;
+  total_size: number;
+}
+
+/** Dir-stats report for child directories under a prefix. */
+export interface DirStatsReport {
+  bucket: string;
+  prefix: string;
+  dirs: DirStats[];
+}
+
 /** Cross-bucket duplicate report. */
 export interface CrossBucketDuplicateReport {
   is_truncated: boolean;

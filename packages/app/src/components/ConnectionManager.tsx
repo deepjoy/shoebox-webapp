@@ -39,9 +39,22 @@ export function ConnectionManager() {
     },
   });
 
+  function nextConnectionName() {
+    const existing = new Set(connections.map((c) => c.name));
+    let i = 1;
+    while (existing.has(`connection-${i}`)) i++;
+    return `connection-${i}`;
+  }
+
   function openNew() {
     setEditing(null);
-    form.reset();
+    form.setValues({
+      name: nextConnectionName(),
+      endpoint: "http://localhost:9000",
+      accessKeyId: "",
+      secretAccessKey: "",
+      region: "us-east-1",
+    });
     setOpened(true);
   }
 
