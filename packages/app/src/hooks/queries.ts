@@ -16,6 +16,8 @@ import { useShoeboxClient } from "../contexts/client";
 
 export const queryKeys = {
   buckets: (connectionId: string) => ["buckets", connectionId] as const,
+  bucketStats: (connectionId: string, bucket: string) =>
+    ["bucket-stats", connectionId, bucket] as const,
   objects: (connectionId: string, bucket: string, prefix: string) =>
     ["objects", connectionId, bucket, prefix] as const,
   headObject: (connectionId: string, bucket: string, key: string) =>
@@ -38,6 +40,14 @@ export function useBuckets(connectionId: string) {
   return useSuspenseQuery({
     queryKey: queryKeys.buckets(connectionId),
     queryFn: () => client.listBuckets(),
+  });
+}
+
+export function useBucketStats(connectionId: string, bucket: string) {
+  const client = useShoeboxClient();
+  return useQuery({
+    queryKey: queryKeys.bucketStats(connectionId, bucket),
+    queryFn: () => client.getBucketStats(bucket),
   });
 }
 

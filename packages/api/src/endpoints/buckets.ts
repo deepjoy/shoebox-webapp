@@ -1,5 +1,5 @@
 import type { Signer } from "../signer";
-import type { Bucket } from "../types";
+import type { Bucket, BucketStats } from "../types";
 import { parseXml } from "../xml";
 
 /** GET / — list all buckets. */
@@ -15,6 +15,36 @@ export async function listBuckets(signer: Signer, endpoint: string): Promise<Buc
     name: b.Name,
     creationDate: b.CreationDate,
   }));
+}
+
+/** GET /{bucket}?stats — bucket aggregate statistics. */
+export async function getBucketStats(
+  signer: Signer,
+  endpoint: string,
+  bucket: string,
+): Promise<BucketStats> {
+  const res = await signer.fetch(`${endpoint}/${bucket}?stats`);
+  if (!res.ok) throw new Error(`GetBucketStats failed: ${res.status}`);
+  const xml = await res.text();
+  const parsed = parseXml<{
+    BucketStatsResult?: {
+      Name: string;
+      TotalFiles: number;
+      TotalSize: number;
+      DuplicateFolders: number;
+      DuplicateFiles: number;
+      StorageReclaimable: number;
+    };
+  }>(xml);
+  const r = parsed.BucketStatsResult;
+  return {
+    name: r?.Name ?? bucket,
+    totalFiles: Number(r?.TotalFiles ?? 0),
+    totalSize: Number(r?.TotalSize ?? 0),
+    duplicateFolders: Number(r?.DuplicateFolders ?? 0),
+    duplicateFiles: Number(r?.DuplicateFiles ?? 0),
+    storageReclaimable: Number(r?.StorageReclaimable ?? 0),
+  };
 }
 
 /** HEAD /{bucket} — check bucket exists. */

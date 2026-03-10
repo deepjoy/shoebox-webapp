@@ -1,6 +1,7 @@
 import { Signer } from "./signer";
 import type {
   Bucket,
+  BucketStats,
   ListObjectsV2Options,
   ListObjectsV2Result,
   HeadObjectResult,
@@ -61,6 +62,10 @@ export class ShoeboxClient {
 
   headBucket(bucket: string): Promise<boolean> {
     return buckets.headBucket(this.signer, this.endpoint, bucket);
+  }
+
+  getBucketStats(bucket: string): Promise<BucketStats> {
+    return buckets.getBucketStats(this.signer, this.endpoint, bucket);
   }
 
   // -- Object listing --

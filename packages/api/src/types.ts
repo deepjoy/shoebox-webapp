@@ -171,6 +171,16 @@ export interface IntegrityDiscrepancy {
   mtime_changed?: boolean;
 }
 
+/** Bucket-level aggregate statistics (from ?stats). */
+export interface BucketStats {
+  name: string;
+  totalFiles: number;
+  totalSize: number;
+  duplicateFolders: number;
+  duplicateFiles: number;
+  storageReclaimable: number;
+}
+
 /** Scan status for a single bucket (PascalCase matches XML element names). */
 export interface BucketScanStatus {
   Name: string;
