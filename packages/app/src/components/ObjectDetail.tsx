@@ -28,6 +28,7 @@ import { useConnectionId } from "../routes/$connectionId";
 import { useBucket } from "../contexts/bucket";
 import { BreadcrumbNav } from "./Breadcrumb";
 import { getIconForKey } from "../lib/mime-icons";
+import { getFriendlyTypeName } from "../lib/friendly-mime";
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -147,6 +148,7 @@ export function ObjectDetail({ objectKey }: ObjectDetailProps) {
               <Table>
                 <Table.Tbody>
                   <MetaRow label="Key" value={objectKey} />
+                  <MetaRow label="Type" value={getFriendlyTypeName(meta.contentType, objectKey)} />
                   <MetaRow label="Content-Type" value={meta.contentType} />
                   <MetaRow label="Size" value={formatBytes(meta.contentLength)} />
                   <MetaRow label="ETag" value={meta.etag} />
