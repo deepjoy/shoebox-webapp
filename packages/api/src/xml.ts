@@ -19,6 +19,7 @@ const parser = new XMLParser({
       "Discrepancy",
       "Directory",
       "Difference",
+      "DirStats",
     ];
     return arrayTags.includes(name);
   },

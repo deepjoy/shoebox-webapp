@@ -6,7 +6,11 @@ import { MimeIcon } from "./MimeIcon";
 import { ObjectActions } from "./ObjectActions";
 import { useConnectionId } from "../routes/$connectionId";
 import { useBucket } from "../contexts/bucket";
-import { useAllDuplicatesForPrefix, useAllDuplicateDirsForPrefix } from "../hooks/queries";
+import {
+  useAllDuplicatesForPrefix,
+  useAllDuplicateDirsForPrefix,
+  useDirStats,
+} from "../hooks/queries";
 import { sortDuplicatesByRelevance } from "../lib/duplicate-sort";
 
 interface FolderRow {
@@ -41,6 +45,15 @@ interface ObjectTableProps {
 export function ObjectTable({ prefix, folders, objects, footer }: ObjectTableProps) {
   const connectionId = useConnectionId();
   const bucket = useBucket();
+  // Directory size stats (non-blocking)
+  const { data: dirStatsData } = useDirStats(connectionId, bucket, prefix);
+  const folderSizeMap = new Map<string, number>();
+  if (dirStatsData) {
+    for (const d of dirStatsData.dirs) {
+      folderSizeMap.set(d.prefix, d.total_size);
+    }
+  }
+
   // Duplicate directories from backend (folder IS a duplicate of another folder)
   const { data: dirPages } = useAllDuplicateDirsForPrefix(connectionId, bucket, prefix, 1);
   const duplicateFolders = new Set<string>();
@@ -208,7 +221,13 @@ export function ObjectTable({ prefix, folders, objects, footer }: ObjectTablePro
                   )}
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm">{row.type === "folder" ? "—" : formatBytes(row.info.size)}</Text>
+                  <Text size="sm">
+                    {row.type === "folder"
+                      ? folderSizeMap.has(row.prefix)
+                        ? formatBytes(folderSizeMap.get(row.prefix)!)
+                        : "—"
+                      : formatBytes(row.info.size)}
+                  </Text>
                 </Table.Td>
                 <Table.Td>
                   {row.type === "object" && (
