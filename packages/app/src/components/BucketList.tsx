@@ -4,14 +4,17 @@ import {
   Card,
   Group,
   SimpleGrid,
+  Skeleton,
   Text,
   Title,
   Stack,
   Tooltip,
+  Divider,
+  ThemeIcon,
 } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
-import { Database, RefreshCw } from "lucide-react";
-import { useBuckets, useScanStatus, useSyncBucket } from "../hooks/queries";
+import { Database, RefreshCw, Files, HardDrive, Copy, FolderSync, Recycle } from "lucide-react";
+import { useBuckets, useBucketStats, useScanStatus, useSyncBucket } from "../hooks/queries";
 import { useConnectionId } from "../routes/$connectionId";
 import type { BucketScanStatus } from "@shoebox/api";
 
@@ -23,6 +26,12 @@ function formatTimeAgo(date: Date): string {
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
   return `${Math.floor(hours / 24)}d ago`;
+}
+
+/** Returns true if a creation date is valid (not epoch-zero or missing). */
+function isValidDate(dateStr: string): boolean {
+  const d = new Date(dateStr);
+  return !Number.isNaN(d.getTime()) && d.getTime() > 0;
 }
 
 export function BucketList() {
@@ -44,7 +53,7 @@ export function BucketList() {
         <Group gap="xs">
           {dataUpdatedAt > 0 && (
             <Text size="xs" c="dimmed">
-              Status: {formatTimeAgo(new Date(dataUpdatedAt))}
+              Updated {formatTimeAgo(new Date(dataUpdatedAt))}
             </Text>
           )}
           <Tooltip label="Refresh status">
@@ -75,6 +84,14 @@ export function BucketList() {
   );
 }
 
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
+}
+
 function BucketCard({
   connectionId,
   bucket,
@@ -85,7 +102,10 @@ function BucketCard({
   scanStatus?: BucketScanStatus;
 }) {
   const syncMutation = useSyncBucket(connectionId, bucket.name);
+  const { data: stats, isLoading: statsLoading } = useBucketStats(connectionId, bucket.name);
   const isActive = scanStatus ? scanStatus.RunningCount > 0 || scanStatus.PendingCount > 0 : false;
+
+  const hasDuplicates = stats && (stats.duplicateFiles > 0 || stats.duplicateFolders > 0);
 
   return (
     <Card
@@ -96,8 +116,10 @@ function BucketCard({
       to={`/${encodeURIComponent(connectionId)}/${encodeURIComponent(bucket.name)}/`}
       style={{ cursor: "pointer", textDecoration: "none", color: "inherit" }}
     >
-      <Group justify="space-between" align="flex-start" mb={8}>
-        <Database size={32} />
+      <Group justify="space-between" align="flex-start" mb="xs">
+        <ThemeIcon variant="light" size="lg" color="como">
+          <Database size={20} />
+        </ThemeIcon>
         {isActive ? (
           <Badge size="sm" variant="light" color="blue">
             {scanStatus!.RunningCount} running · {scanStatus!.PendingCount} queued
@@ -120,10 +142,73 @@ function BucketCard({
           </Tooltip>
         )}
       </Group>
-      <Text fw={500}>{bucket.name}</Text>
-      <Text size="xs" c="dimmed">
-        Created: {new Date(bucket.creationDate).toLocaleDateString()}
-      </Text>
+
+      <Title order={4} mb={2}>
+        {bucket.name}
+      </Title>
+      {isValidDate(bucket.creationDate) && (
+        <Text size="xs" c="dimmed" mb="sm">
+          Created {new Date(bucket.creationDate).toLocaleDateString()}
+        </Text>
+      )}
+
+      {statsLoading && (
+        <Stack gap={6} mt="xs">
+          <Skeleton height={12} width="60%" />
+          <Skeleton height={12} width="40%" />
+        </Stack>
+      )}
+
+      {stats && (
+        <Stack gap={6}>
+          <Group gap="lg">
+            <Group gap={6}>
+              <Files size={13} color="var(--mantine-color-dimmed)" />
+              <Text size="xs" c="dimmed">
+                {stats.totalFiles.toLocaleString()} files
+              </Text>
+            </Group>
+            <Group gap={6}>
+              <HardDrive size={13} color="var(--mantine-color-dimmed)" />
+              <Text size="xs" c="dimmed">
+                {formatBytes(stats.totalSize)}
+              </Text>
+            </Group>
+          </Group>
+
+          {hasDuplicates && (
+            <>
+              <Divider />
+              <Group gap="lg">
+                {stats.duplicateFiles > 0 && (
+                  <Group gap={6}>
+                    <Copy size={13} color="var(--mantine-color-yellow-6)" />
+                    <Text size="xs" c="yellow.6">
+                      {stats.duplicateFiles.toLocaleString()} dup files
+                    </Text>
+                  </Group>
+                )}
+                {stats.duplicateFolders > 0 && (
+                  <Group gap={6}>
+                    <FolderSync size={13} color="var(--mantine-color-yellow-6)" />
+                    <Text size="xs" c="yellow.6">
+                      {stats.duplicateFolders.toLocaleString()} dup folders
+                    </Text>
+                  </Group>
+                )}
+              </Group>
+              {stats.storageReclaimable > 0 && (
+                <Group gap={6}>
+                  <Recycle size={13} color="var(--mantine-color-orange-6)" />
+                  <Text size="xs" fw={500} c="orange">
+                    {formatBytes(stats.storageReclaimable)} reclaimable
+                  </Text>
+                </Group>
+              )}
+            </>
+          )}
+        </Stack>
+      )}
     </Card>
   );
 }
