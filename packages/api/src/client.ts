@@ -139,6 +139,7 @@ export class ShoeboxClient {
       maxResults?: number;
       prefix?: string;
       continuationToken?: string;
+      maxDepth?: number;
     },
   ): Promise<DuplicateDirReport> {
     return duplicates.findBucketDuplicateDirs(this.signer, this.endpoint, bucket, options);

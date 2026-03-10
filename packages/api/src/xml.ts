@@ -14,6 +14,7 @@ const parser = new XMLParser({
       "Upload",
       "Tag",
       "DuplicateGroup",
+      "DuplicateDirGroup",
       "File",
       "Discrepancy",
       "Directory",
