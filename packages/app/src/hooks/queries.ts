@@ -24,6 +24,8 @@ export const queryKeys = {
     ["duplicates", connectionId, bucket, keyContains, maxDepth] as const,
   duplicateDirs: (connectionId: string, bucket: string, prefix?: string, maxDepth?: number) =>
     ["duplicate-dirs", connectionId, bucket, prefix, maxDepth] as const,
+  dirStats: (connectionId: string, bucket: string, prefix: string) =>
+    ["dir-stats", connectionId, bucket, prefix] as const,
   scanStatus: (connectionId: string) => ["scan-status", connectionId] as const,
 };
 
@@ -178,6 +180,15 @@ export function useAllDuplicateDirsForPrefix(
   }, [query.hasNextPage, query.isFetchingNextPage, query.fetchNextPage]);
 
   return query;
+}
+
+/** Non-suspense query for directory size stats at a given prefix level. */
+export function useDirStats(connectionId: string, bucket: string, prefix: string) {
+  const client = useShoeboxClient();
+  return useQuery({
+    queryKey: queryKeys.dirStats(connectionId, bucket, prefix),
+    queryFn: () => client.getDirStats(bucket, prefix),
+  });
 }
 
 export function useScanStatus(connectionId: string) {

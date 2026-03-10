@@ -10,6 +10,7 @@ import type {
   DuplicateDirReport,
   FindDuplicatesOptions,
   CrossBucketDuplicateReport,
+  DirStatsReport,
   IntegrityCheckResult,
   CredentialInfo,
   BucketScanStatus,
@@ -22,6 +23,7 @@ import * as tagging from "./endpoints/tagging";
 import * as sync from "./endpoints/sync";
 import * as scan from "./endpoints/scan";
 import * as duplicates from "./endpoints/duplicates";
+import * as dirStatsEndpoint from "./endpoints/dir-stats";
 import * as integrity from "./endpoints/integrity";
 import * as credentials from "./endpoints/credentials";
 import * as multipart from "./endpoints/multipart";
@@ -147,6 +149,12 @@ export class ShoeboxClient {
 
   findCrossBucketDuplicates(maxResults?: number): Promise<CrossBucketDuplicateReport> {
     return duplicates.findCrossBucketDuplicates(this.signer, this.endpoint, maxResults);
+  }
+
+  // -- Directory Stats --
+
+  getDirStats(bucket: string, prefix?: string): Promise<DirStatsReport> {
+    return dirStatsEndpoint.getDirStats(this.signer, this.endpoint, bucket, prefix);
   }
 
   // -- Integrity --
