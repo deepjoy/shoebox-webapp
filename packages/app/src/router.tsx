@@ -18,7 +18,7 @@ const indexRoute = createRoute({
     if (conns.length > 0) {
       throw redirect({ to: "/$connectionId", params: { connectionId: conns[0].id } });
     }
-    throw redirect({ to: "/connections" });
+    throw redirect({ to: "/connections", search: { error: undefined, message: undefined } });
   },
 });
 
@@ -26,6 +26,10 @@ const connectionsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/connections",
   component: ConnectionsPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    error: (search.error as string) || undefined,
+    message: (search.message as string) || undefined,
+  }),
 });
 
 const connectionRoute = createRoute({
