@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Alert,
   Badge,
   Card,
   Group,
@@ -22,6 +23,7 @@ import {
   FolderSync,
   Recycle,
   ScanSearch,
+  TriangleAlert,
 } from "lucide-react";
 import { useBuckets, useBucketStats, useScanStatus } from "../hooks/queries";
 import { useConnectionId } from "../routes/$connectionId";
@@ -55,8 +57,19 @@ export function BucketList() {
     }
   }
 
+  const failedBuckets = scanStatuses?.filter((s) => s.L1Failed).map((s) => s.Name) ?? [];
+
   return (
     <Stack>
+      {failedBuckets.length > 0 && (
+        <Alert color="red" title="Scan failed" icon={<TriangleAlert size={20} />}>
+          Initial scan failed for{" "}
+          <Text span fw={600}>
+            {failedBuckets.join(", ")}
+          </Text>
+          . Please restart Shoebox to retry.
+        </Alert>
+      )}
       <Group gap="xs" align="center">
         <Title order={2}>Buckets</Title>
         <Tooltip label="Refresh status">
