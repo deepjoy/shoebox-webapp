@@ -188,6 +188,7 @@ export interface BucketScanStatus {
   PendingCount: number;
   PausedCount: number;
   IsPaused: boolean;
+  L1Running: boolean;
 }
 
 /** Credential info (secret redacted in list responses). */

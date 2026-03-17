@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  Alert,
   Button,
   Card,
   Group,
@@ -12,16 +13,18 @@ import {
   SimpleGrid,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import type { ShoeboxConnection } from "@shoebox/api";
 import { getConnections, saveConnection, deleteConnection } from "../lib/connections";
 
 export function ConnectionManager() {
   const navigate = useNavigate();
+  const { error, message } = useSearch({ strict: false }) as { error?: string; message?: string };
   const [connections, setConnections] = useState(getConnections);
   const [editing, setEditing] = useState<ShoeboxConnection | null>(null);
   const [opened, setOpened] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   const form = useForm({
     initialValues: {
@@ -93,6 +96,17 @@ export function ConnectionManager() {
           Add Connection
         </Button>
       </Group>
+
+      {error && !dismissed && (
+        <Alert
+          color="red"
+          title={`Failed to connect to "${error}"`}
+          withCloseButton
+          onClose={() => setDismissed(true)}
+        >
+          <Text size="sm">{message}</Text>
+        </Alert>
+      )}
 
       {connections.length === 0 && (
         <Text c="dimmed">No connections yet. Add one to get started.</Text>

@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useRef } from "react";
-import { Stack, Loader, Center, Text } from "@mantine/core";
+import { Badge, Button, Drawer, Group, Stack, Loader, Center, Text } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { RefreshCw, FolderSync } from "lucide-react";
 import { BreadcrumbNav } from "./Breadcrumb";
+import { DuplicateFoldersList } from "./DuplicateFoldersList";
 import { ObjectTable } from "./ObjectTable";
-import { useInfiniteObjects } from "../hooks/queries";
+import { useInfiniteObjects, useSyncBucket, useScanStatus, useBucketStats } from "../hooks/queries";
 import { useConnectionId } from "../routes/$connectionId";
 import { useBucket } from "../contexts/bucket";
+import type { BucketScanStatus } from "@shoebox/api";
 
 interface ObjectBrowserProps {
   prefix: string;
@@ -48,9 +52,12 @@ export function ObjectBrowser({ prefix }: ObjectBrowserProps) {
     return () => observerRef.current?.disconnect();
   }, []);
 
+  const isRoot = prefix === "";
+
   return (
     <Stack>
       <BreadcrumbNav prefix={prefix} />
+      {isRoot && <BucketActions />}
       <ObjectTable
         prefix={prefix}
         folders={folders}
@@ -74,5 +81,61 @@ export function ObjectBrowser({ prefix }: ObjectBrowserProps) {
         }
       />
     </Stack>
+  );
+}
+
+function BucketActions() {
+  const connectionId = useConnectionId();
+  const bucket = useBucket();
+  const syncMutation = useSyncBucket(connectionId, bucket);
+  const { data: scanStatuses } = useScanStatus(connectionId);
+  const { data: stats } = useBucketStats(connectionId, bucket);
+  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
+
+  const scanStatus: BucketScanStatus | undefined = scanStatuses?.find(
+    (s: BucketScanStatus) => s.Name === bucket,
+  );
+  const isActive = scanStatus ? scanStatus.RunningCount > 0 || scanStatus.PendingCount > 0 : false;
+  const hasDuplicateFolders = stats ? stats.duplicateFolders > 0 : false;
+
+  return (
+    <>
+      <Group gap="xs">
+        {isActive ? (
+          <Badge size="lg" variant="light" color="blue">
+            {scanStatus!.RunningCount} running &middot; {scanStatus!.PendingCount} queued
+          </Badge>
+        ) : (
+          <Button
+            variant="default"
+            size="xs"
+            leftSection={<RefreshCw size={14} />}
+            onClick={() => syncMutation.mutate()}
+            loading={syncMutation.isPending}
+          >
+            Re-scan
+          </Button>
+        )}
+        {hasDuplicateFolders && (
+          <Button
+            variant="default"
+            size="xs"
+            leftSection={<FolderSync size={14} />}
+            onClick={openDrawer}
+          >
+            Duplicate folders ({stats!.duplicateFolders})
+          </Button>
+        )}
+      </Group>
+      <Drawer
+        opened={drawerOpened}
+        onClose={closeDrawer}
+        title="Duplicate Folders"
+        position="right"
+        size="md"
+      >
+        <DuplicateFoldersList onNavigate={closeDrawer} />
+      </Drawer>
+    </>
   );
 }

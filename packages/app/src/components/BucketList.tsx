@@ -13,8 +13,17 @@ import {
   ThemeIcon,
 } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
-import { Database, RefreshCw, Files, HardDrive, Copy, FolderSync, Recycle } from "lucide-react";
-import { useBuckets, useBucketStats, useScanStatus, useSyncBucket } from "../hooks/queries";
+import {
+  Database,
+  RefreshCw,
+  Files,
+  HardDrive,
+  Copy,
+  FolderSync,
+  Recycle,
+  ScanSearch,
+} from "lucide-react";
+import { useBuckets, useBucketStats, useScanStatus } from "../hooks/queries";
 import { useConnectionId } from "../routes/$connectionId";
 import type { BucketScanStatus } from "@shoebox/api";
 
@@ -48,26 +57,24 @@ export function BucketList() {
 
   return (
     <Stack>
-      <Group justify="space-between" align="center">
+      <Group gap="xs" align="center">
         <Title order={2}>Buckets</Title>
-        <Group gap="xs">
-          {dataUpdatedAt > 0 && (
-            <Text size="xs" c="dimmed">
-              Updated {formatTimeAgo(new Date(dataUpdatedAt))}
-            </Text>
-          )}
-          <Tooltip label="Refresh status">
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              onClick={() => refetch()}
-              loading={isFetching}
-              aria-label="Refresh scan status"
-            >
-              <RefreshCw size={14} />
-            </ActionIcon>
-          </Tooltip>
-        </Group>
+        <Tooltip label="Refresh status">
+          <ActionIcon
+            variant="filled"
+            size="sm"
+            onClick={() => refetch()}
+            loading={isFetching}
+            aria-label="Refresh scan status"
+          >
+            <RefreshCw size={14} />
+          </ActionIcon>
+        </Tooltip>
+        {dataUpdatedAt > 0 && (
+          <Text size="xs" c="dimmed">
+            Updated {formatTimeAgo(new Date(dataUpdatedAt))}
+          </Text>
+        )}
       </Group>
       {buckets.length === 0 && <Text c="dimmed">No buckets found.</Text>}
       <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }}>
@@ -101,7 +108,6 @@ function BucketCard({
   bucket: { name: string; creationDate: string };
   scanStatus?: BucketScanStatus;
 }) {
-  const syncMutation = useSyncBucket(connectionId, bucket.name);
   const { data: stats, isLoading: statsLoading } = useBucketStats(connectionId, bucket.name);
   const isActive = scanStatus ? scanStatus.RunningCount > 0 || scanStatus.PendingCount > 0 : false;
 
@@ -120,26 +126,15 @@ function BucketCard({
         <ThemeIcon variant="light" size="lg" color="como">
           <Database size={20} />
         </ThemeIcon>
-        {isActive ? (
+        {scanStatus?.L1Running && (
+          <Badge size="sm" variant="light" color="yellow" leftSection={<ScanSearch size={12} />}>
+            Scanning
+          </Badge>
+        )}
+        {isActive && (
           <Badge size="sm" variant="light" color="blue">
             {scanStatus!.RunningCount} running · {scanStatus!.PendingCount} queued
           </Badge>
-        ) : (
-          <Tooltip label="Sync bucket">
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              aria-label={`Sync ${bucket.name}`}
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-                syncMutation.mutate();
-              }}
-              loading={syncMutation.isPending}
-            >
-              <RefreshCw size={16} />
-            </ActionIcon>
-          </Tooltip>
         )}
       </Group>
 
