@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0](https://github.com/deepjoy/shoebox-webapp/compare/api-v0.2.0...api-v0.3.0) (2026-03-17)
+
+
+### Features
+
+* **app:** add L1 scan status, connection error handling, and bucket actions ([#17](https://github.com/deepjoy/shoebox-webapp/issues/17)) ([467b635](https://github.com/deepjoy/shoebox-webapp/commit/467b635c3c282bcd1b1e9add383c1532bf70fbf9))
+* **app:** display bucket stats on bucket cards ([#13](https://github.com/deepjoy/shoebox-webapp/issues/13)) ([23cc8e9](https://github.com/deepjoy/shoebox-webapp/commit/23cc8e96e4d040ba92a89a4b216303828bd4c692))
+* **duplicates:** add max-depth filtering for duplicate files and directories ([#9](https://github.com/deepjoy/shoebox-webapp/issues/9)) ([1d362dd](https://github.com/deepjoy/shoebox-webapp/commit/1d362dd9b32e4828501a33e3d1edf38fea568687))
+* **preview:** add inline file previews and directory size stats ([#11](https://github.com/deepjoy/shoebox-webapp/issues/11)) ([ec5aaae](https://github.com/deepjoy/shoebox-webapp/commit/ec5aaae736750190a412a80f5a3db45dd525fb2d))
+
 ## [0.2.0](https://github.com/deepjoy/shoebox-webapp/compare/api-v0.1.0...api-v0.2.0) (2026-03-07)
 
 
