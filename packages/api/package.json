@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "aws4fetch": "^1.0.20",
-    "fast-xml-parser": "^5.4.2"
+    "fast-xml-parser": "^5.5.8"
   },
   "devDependencies": {
     "@shoebox/tsconfig": "workspace:*",
